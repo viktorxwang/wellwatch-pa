@@ -1,0 +1,7 @@
+# Private working notes — strategy material, kept local
+docs/
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
