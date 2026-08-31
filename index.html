@@ -1,0 +1,901 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Crowdsourced discovery and risk triage for Pennsylvania's orphaned and abandoned oil and gas wells.">
+<meta name="color-scheme" content="light dark">
+<title>WellWatch PA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@500;600;700&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+
+<style>
+:root{
+  --paper:#EDF0EA;
+  --surface:#F7F8F4;
+  --surface-2:#E3E8DE;
+  --line:#C8D0C2;
+  --line-soft:#D8DED2;
+  --ink:#171C18;
+  --ink-2:#414A41;
+  --ink-3:#69735F;
+  --accent:#1F6F5C;
+  --accent-soft:#DCE9E2;
+  --crit:#A5301C;
+  --high:#B26908;
+  --mod:#6C8021;
+  --low:#3E7484;
+  --crit-bg:#F5DED8;
+  --high-bg:#F7E7CD;
+  --mod-bg:#E6EDCF;
+  --low-bg:#D9E7EB;
+  --map-land:#E7EBE0;
+  --map-edge:#8E9A88;
+  --shadow:0 1px 2px rgba(23,28,24,.06), 0 8px 24px -12px rgba(23,28,24,.18);
+  --r:3px;
+}
+:root:not([data-theme="light"]) { color-scheme: light; }
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#0F1412;
+    --surface:#171E1A;
+    --surface-2:#202A24;
+    --line:#2E3A32;
+    --line-soft:#26312A;
+    --ink:#E8EDE6;
+    --ink-2:#B4BFB3;
+    --ink-3:#83907F;
+    --accent:#4FBF9C;
+    --accent-soft:#1B3830;
+    --crit:#F0705A;
+    --high:#E8A93F;
+    --mod:#A8C24E;
+    --low:#68B0C4;
+    --crit-bg:#3A1B15;
+    --high-bg:#3A2A10;
+    --mod-bg:#26300F;
+    --low-bg:#132A31;
+    --map-land:#1C241E;
+    --map-edge:#43524589;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px -14px rgba(0,0,0,.7);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0F1412;
+  --surface:#171E1A;
+  --surface-2:#202A24;
+  --line:#2E3A32;
+  --line-soft:#26312A;
+  --ink:#E8EDE6;
+  --ink-2:#B4BFB3;
+  --ink-3:#83907F;
+  --accent:#4FBF9C;
+  --accent-soft:#1B3830;
+  --crit:#F0705A;
+  --high:#E8A93F;
+  --mod:#A8C24E;
+  --low:#68B0C4;
+  --crit-bg:#3A1B15;
+  --high-bg:#3A2A10;
+  --mod-bg:#26300F;
+  --low-bg:#132A31;
+  --map-land:#1C241E;
+  --map-edge:#435245;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px -14px rgba(0,0,0,.7);
+  color-scheme: dark;
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:var(--paper);
+  color:var(--ink);
+  font-family:"Public Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  font-size:15px;
+  line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3{font-family:"Zilla Slab",Georgia,serif;font-weight:600;margin:0;text-wrap:balance;letter-spacing:-.01em}
+.mono{font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace;font-variant-numeric:tabular-nums}
+.eyebrow{
+  font-size:10.5px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--ink-3);font-family:"Public Sans",sans-serif;
+}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:2px}
+
+/* ---------- masthead ---------- */
+.masthead{
+  border-bottom:1px solid var(--line);
+  background:var(--surface);
+}
+.masthead-in{
+  max-width:1360px;margin:0 auto;padding:18px 22px 0;
+  display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start;justify-content:space-between;
+}
+.brand{display:flex;gap:12px;align-items:flex-start}
+.mark{
+  width:34px;height:34px;flex:none;margin-top:2px;
+  border:1.5px solid var(--accent);border-radius:50%;
+  display:grid;place-items:center;color:var(--accent);
+}
+.mark svg{width:19px;height:19px;display:block}
+.brand h1{font-size:25px;line-height:1.1}
+.brand p{margin:3px 0 0;font-size:13.5px;color:var(--ink-2);max-width:46ch}
+.badge-gov{
+  display:inline-flex;align-items:center;gap:6px;margin-top:8px;
+  font-size:10.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--accent);background:var(--accent-soft);
+  border:1px solid color-mix(in srgb,var(--accent) 30%,transparent);
+  padding:3px 8px;border-radius:2px;
+}
+.statstrip{display:flex;gap:0;flex-wrap:wrap}
+.stat{padding:0 20px;border-left:1px solid var(--line-soft)}
+.stat:first-child{border-left:0;padding-left:0}
+.stat .v{font-family:"IBM Plex Mono",monospace;font-size:23px;font-weight:600;line-height:1.15;font-variant-numeric:tabular-nums}
+.stat .l{font-size:10.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--ink-3);font-weight:600;margin-top:2px}
+.stat.crit .v{color:var(--crit)}
+.masthead-rule{max-width:1360px;margin:16px auto 0;padding:0 22px}
+.masthead-rule div{height:3px;background:linear-gradient(90deg,var(--crit) 0 22%,var(--high) 22% 46%,var(--mod) 46% 72%,var(--low) 72% 100%);opacity:.85}
+
+/* ---------- layout ---------- */
+.wrap{max-width:1360px;margin:0 auto;padding:20px 22px 60px;display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:20px;align-items:start}
+@media (max-width:980px){.wrap{grid-template-columns:minmax(0,1fr)}}
+
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow)}
+.panel-hd{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:13px 16px;border-bottom:1px solid var(--line-soft)}
+.panel-hd h2{font-size:15.5px}
+.panel-bd{padding:16px}
+
+/* ---------- map ---------- */
+.mapcol{display:flex;flex-direction:column;gap:20px;position:sticky;top:16px}
+@media (max-width:980px){.mapcol{position:static}}
+.controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:11px 16px;border-bottom:1px solid var(--line-soft);background:var(--surface-2)}
+select,input[type=text],input[type=number],textarea{
+  font:inherit;font-size:13px;background:var(--surface);color:var(--ink);
+  border:1px solid var(--line);border-radius:2px;padding:6px 8px;
+}
+.tierbtns{display:flex;gap:5px;margin-left:auto;flex-wrap:wrap}
+.tierbtn{
+  border:1px solid var(--line);background:transparent;border-radius:2px;cursor:pointer;
+  font-size:10.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:5px 8px;
+  display:inline-flex;align-items:center;gap:5px;color:var(--ink-3);
+}
+.tierbtn .dot{width:8px;height:8px;border-radius:50%;background:currentColor}
+.tierbtn[aria-pressed="true"]{color:var(--ink);border-color:currentColor}
+.tierbtn[data-t="Critical"][aria-pressed="true"]{color:var(--crit);background:var(--crit-bg)}
+.tierbtn[data-t="High"][aria-pressed="true"]{color:var(--high);background:var(--high-bg)}
+.tierbtn[data-t="Moderate"][aria-pressed="true"]{color:var(--mod);background:var(--mod-bg)}
+.tierbtn[data-t="Low"][aria-pressed="true"]{color:var(--low);background:var(--low-bg)}
+
+#map{display:block;width:100%;height:auto;background:var(--surface)}
+.mapfoot{padding:9px 16px;border-top:1px solid var(--line-soft);font-size:12px;color:var(--ink-3);display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.pin-arm #map{cursor:crosshair}
+.marker{cursor:pointer;transition:r .12s ease}
+.marker:hover{stroke-width:2.5}
+
+/* ---------- tabs ---------- */
+.tabs{display:flex;border-bottom:1px solid var(--line)}
+.tab{
+  flex:1;background:transparent;border:0;border-bottom:2px solid transparent;
+  padding:12px 8px;cursor:pointer;font-size:12px;font-weight:600;letter-spacing:.07em;
+  text-transform:uppercase;color:var(--ink-3);
+}
+.tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent);background:var(--surface)}
+.tab:not([aria-selected="true"]):hover{color:var(--ink-2);background:var(--surface-2)}
+
+/* ---------- queue ---------- */
+.queue{list-style:none;margin:0;padding:0;max-height:640px;overflow-y:auto}
+.qrow{display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:12px;align-items:center;
+  padding:11px 16px;border-bottom:1px solid var(--line-soft);cursor:pointer;background:transparent;width:100%;border-left:0;border-right:0;border-top:0;text-align:left}
+.qrow:hover{background:var(--surface-2)}
+.qrank{font-family:"IBM Plex Mono",monospace;font-size:12px;font-weight:600;color:var(--ink-3);font-variant-numeric:tabular-nums}
+.qname{font-weight:600;font-size:14px;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.qmeta{font-size:12px;color:var(--ink-3);font-family:"IBM Plex Mono",monospace;margin-top:1px}
+.qscore{font-family:"IBM Plex Mono",monospace;font-size:19px;font-weight:600;font-variant-numeric:tabular-nums;text-align:right;line-height:1}
+.qtier{font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;text-align:right;margin-top:3px}
+.chip{font-size:9.5px;letter-spacing:.09em;text-transform:uppercase;font-weight:700;padding:2px 6px;border-radius:2px;white-space:nowrap}
+.chip.citizen{background:var(--accent-soft);color:var(--accent)}
+.t-Critical{color:var(--crit)} .t-High{color:var(--high)} .t-Moderate{color:var(--mod)} .t-Low{color:var(--low)}
+
+/* ---------- detail ---------- */
+.backbtn{background:transparent;border:0;cursor:pointer;color:var(--accent);font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;padding:0;display:inline-flex;gap:6px;align-items:center}
+.dtl-head{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;margin:14px 0 4px}
+.dtl-head h3{font-size:21px;line-height:1.15}
+.bigscore{text-align:right;flex:none}
+.bigscore .n{font-family:"IBM Plex Mono",monospace;font-size:40px;font-weight:600;line-height:.95;font-variant-numeric:tabular-nums}
+.bigscore .d{font-size:10.5px;letter-spacing:.11em;text-transform:uppercase;font-weight:700;margin-top:3px}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 16px;font-size:13px;margin:14px 0 0;padding:12px 0;border-top:1px solid var(--line-soft);border-bottom:1px solid var(--line-soft)}
+.kv dt{color:var(--ink-3);font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;align-self:center}
+.kv dd{margin:0;font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;font-size:13px}
+.factor{display:grid;grid-template-columns:1fr auto;gap:2px 10px;margin-bottom:9px}
+.factor .fl{font-size:12.5px;color:var(--ink-2)}
+.factor .fv{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--ink-3);font-variant-numeric:tabular-nums}
+.bar{grid-column:1/-1;height:6px;background:var(--surface-2);border-radius:1px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--accent);border-radius:1px}
+.note{font-size:12.5px;color:var(--ink-2);background:var(--surface-2);border-left:2px solid var(--accent);padding:9px 12px;margin-top:14px;line-height:1.5}
+
+/* ---------- form ---------- */
+.field{margin-bottom:14px}
+.field label{display:block;font-size:11px;letter-spacing:.09em;text-transform:uppercase;font-weight:600;color:var(--ink-3);margin-bottom:5px}
+.field input,.field select,.field textarea{width:100%}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:end}
+@media (max-width:520px){.grid2{grid-template-columns:1fr}}
+.radios{display:grid;grid-template-columns:repeat(auto-fit,minmax(128px,1fr));gap:7px}
+.radios label{
+  margin:0;border:1px solid var(--line);border-radius:2px;padding:8px 9px;
+  cursor:pointer;font-size:12px;letter-spacing:0;text-transform:none;font-weight:500;color:var(--ink-2);
+  display:grid;grid-template-columns:auto minmax(0,1fr);gap:7px;align-items:center;text-align:left;
+}
+.radios label input{margin:0;justify-self:center}
+.radios label span{overflow-wrap:anywhere;line-height:1.3}
+.radios input{margin:0;accent-color:var(--accent)}
+.radios label:has(input:checked){border-color:var(--accent);background:var(--accent-soft);color:var(--ink)}
+.btn{
+  background:var(--accent);color:var(--surface);border:1px solid var(--accent);border-radius:2px;
+  padding:10px 16px;font-size:12.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;cursor:pointer;
+}
+.btn.ghost{background:transparent;color:var(--accent)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.formfoot{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:4px}
+.livescore{margin-left:auto;font-family:"IBM Plex Mono",monospace;font-size:13px;color:var(--ink-3)}
+.livescore b{font-size:20px;font-weight:600}
+
+/* ---------- planner ---------- */
+.slider-row{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:6px}
+.slider-row .amt{font-family:"IBM Plex Mono",monospace;font-size:24px;font-weight:600;font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;accent-color:var(--accent);margin:6px 0 2px}
+.strat{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:16px 0 18px}
+@media (max-width:520px){.strat{grid-template-columns:1fr}}
+.stratbtn{text-align:left;border:1px solid var(--line);background:transparent;border-radius:2px;padding:10px 12px;cursor:pointer}
+.stratbtn[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.stratbtn .st{font-size:12.5px;font-weight:700}
+.stratbtn .sd{font-size:11.5px;color:var(--ink-3);margin-top:2px;line-height:1.35}
+.outgrid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line-soft);border:1px solid var(--line-soft)}
+.out{background:var(--surface);padding:12px 14px}
+.out .v{font-family:"IBM Plex Mono",monospace;font-size:22px;font-weight:600;font-variant-numeric:tabular-nums}
+.out .l{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);font-weight:600;margin-top:2px}
+.out .sub{font-size:11.5px;color:var(--ink-3);margin-top:3px}
+.delta{font-size:12.5px;color:var(--ink-2);margin-top:14px;padding:10px 12px;background:var(--surface-2);border-left:2px solid var(--accent);line-height:1.5}
+.fundlist{list-style:none;margin:14px 0 0;padding:0;max-height:230px;overflow-y:auto;border-top:1px solid var(--line-soft)}
+.fundlist li{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px solid var(--line-soft);font-size:12.5px}
+.fundlist .m{font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;color:var(--ink-3)}
+footer.src{max-width:1360px;margin:0 auto;padding:0 22px 40px;font-size:11.5px;color:var(--ink-3);line-height:1.6;max-width:1360px}
+footer.src b{color:var(--ink-2)}
+</style>
+</head>
+<body>
+<header class="masthead">
+  <div class="masthead-in">
+    <div class="brand">
+      <div class="mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+          <path d="M12 3v18M7 21l5-9 5 9M9.5 9h5"/>
+        </svg>
+      </div>
+      <div>
+        <h1>WellWatch PA</h1>
+        <p>Crowdsourced discovery and risk triage for Pennsylvania's orphaned and abandoned oil &amp; gas wells.</p>
+        <span class="badge-gov">Prototype &middot; Congressional App Challenge</span>
+      </div>
+    </div>
+    <div class="statstrip" id="statstrip"></div>
+  </div>
+  <div class="masthead-rule"><div></div></div>
+</header>
+
+<div class="wrap">
+  <!-- ============ MAP ============ -->
+  <div class="mapcol">
+    <section class="panel" id="mapPanel">
+      <div class="controls">
+        <label class="eyebrow" for="countySel" style="margin-right:-2px">County</label>
+        <select id="countySel"><option value="">All 31 counties</option></select>
+        <div class="tierbtns" id="tierbtns"></div>
+      </div>
+      <svg id="map" viewBox="0 0 620 378" role="img" aria-label="Map of Pennsylvania showing located orphan wells, colored by risk tier"></svg>
+      <div class="mapfoot">
+        <span id="mapCount"></span>
+        <span id="mapHint">Click any well for its risk breakdown.</span>
+      </div>
+    </section>
+  </div>
+
+  <!-- ============ WORK COLUMN ============ -->
+  <div>
+    <section class="panel">
+      <div class="tabs" role="tablist">
+        <button class="tab" role="tab" id="tab-queue" aria-selected="true" aria-controls="p-queue">Triage queue</button>
+        <button class="tab" role="tab" id="tab-report" aria-selected="false" aria-controls="p-report">Field report</button>
+        <button class="tab" role="tab" id="tab-plan" aria-selected="false" aria-controls="p-plan">Plugging planner</button>
+      </div>
+
+      <div id="p-queue" role="tabpanel" aria-labelledby="tab-queue"></div>
+
+      <div id="p-report" role="tabpanel" aria-labelledby="tab-report" hidden>
+        <div class="panel-bd">
+          <p style="margin:0 0 16px;font-size:13.5px;color:var(--ink-2)">
+            Found a rusted pipe in a creek bed or a bubbling patch in a field? Log it here. The same scoring model
+            the Department of Environmental Protection would use runs on your report the moment you submit it.
+          </p>
+          <div class="field">
+            <label>Location</label>
+            <div class="formfoot" style="margin:0">
+              <button class="btn ghost" id="pinBtn" type="button">Drop a pin on the map</button>
+              <span class="mono" id="pinOut" style="font-size:12.5px;color:var(--ink-3)">No location set</span>
+            </div>
+          </div>
+          <div class="grid2">
+            <div class="field">
+              <label for="f_struct">Nearest occupied building (ft)</label>
+              <input type="number" id="f_struct" value="320" min="0" max="10000" step="10">
+            </div>
+            <div class="field">
+              <label for="f_stream">Nearest stream or water well (ft)</label>
+              <input type="number" id="f_stream" value="150" min="0" max="10000" step="10">
+            </div>
+          </div>
+          <div class="field">
+            <label>What do you smell or hear at the wellhead?</label>
+            <div class="radios" id="f_methane"></div>
+          </div>
+          <div class="field">
+            <label>Condition of the pipe</label>
+            <div class="radios" id="f_cond"></div>
+          </div>
+          <div class="grid2">
+            <div class="field">
+              <label for="f_era">Estimated drilling era</label>
+              <select id="f_era"></select>
+            </div>
+            <div class="field">
+              <label for="f_sens">School, daycare or hospital within 1,500 ft?</label>
+              <select id="f_sens"><option value="0">No</option><option value="1">Yes</option></select>
+            </div>
+          </div>
+          <div class="formfoot">
+            <button class="btn" id="submitBtn" type="button" disabled>Submit to DEP queue</button>
+            <span class="livescore">Live risk score <b id="liveScore">&mdash;</b>/100</span>
+          </div>
+          <div class="note" id="reportNote" hidden></div>
+        </div>
+      </div>
+
+      <div id="p-plan" role="tabpanel" aria-labelledby="tab-plan" hidden>
+        <div class="panel-bd">
+          <p style="margin:0 0 16px;font-size:13.5px;color:var(--ink-2)">
+            Pennsylvania has more documented orphan wells than plugging money. This planner spends a fixed
+            grant against the ranked inventory and shows what each spending strategy actually buys.
+          </p>
+          <div class="slider-row">
+            <span class="eyebrow">Available grant</span>
+            <span class="amt" id="budgetOut">$8.0M</span>
+          </div>
+          <input type="range" id="budget" min="500000" max="12000000" step="100000" value="3500000">
+          <div class="strat" id="strat">
+            <button class="stratbtn" data-s="risk" aria-pressed="false" type="button">
+              <div class="st">Highest risk first</div>
+              <div class="sd">Plug the most dangerous well, then the next. The intuitive approach.</div>
+            </button>
+            <button class="stratbtn" data-s="eff" aria-pressed="true" type="button">
+              <div class="st">Risk retired per dollar</div>
+              <div class="sd">Rank by score &divide; plugging cost. Deep wells cost more to close.</div>
+            </button>
+          </div>
+          <div class="outgrid" id="planOut"></div>
+          <div class="delta" id="planDelta"></div>
+          <ul class="fundlist" id="fundlist"></ul>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<footer class="src">
+  <b>About the data.</b> Well locations, depths and hazard readings in this prototype are synthetic but are generated
+  to match the documented distribution of Pennsylvania's legacy wells &mdash; concentrated in the Venango&ndash;Warren&ndash;McKean
+  oil region where commercial drilling began at Titusville in 1859. Pennsylvania has roughly 27,000 documented orphan
+  and abandoned wells, with credible estimates of 100,000 to 560,000 more that were never recorded. Production
+  deployment would read the DEP Oil &amp; Gas Locations feed and write reports back through the DEP eFACTS intake.
+</footer>
+
+<script>
+(function(){
+"use strict";
+
+/* ============================================================
+   1. GEOGRAPHY \u2014 projection + simplified Pennsylvania boundary
+   ============================================================ */
+var LON0=-80.78, LON1=-74.52, LAT0=39.58, LAT1=42.46, MW=620, MH=378;
+function px(lon){ return (lon-LON0)/(LON1-LON0)*MW; }
+function py(lat){ return (LAT1-lat)/(LAT1-LAT0)*MH; }
+
+var PA_OUTLINE=[
+ [-80.519,39.721],[-80.519,40.638],[-80.519,41.849],[-80.519,42.327],
+ [-80.18,42.24],[-79.90,42.13],[-79.762,42.000],
+ [-78.60,41.999],[-77.20,41.999],[-76.10,41.999],[-75.359,41.999],
+ [-75.20,41.87],[-75.05,41.78],[-74.98,41.60],[-74.83,41.44],[-74.694,41.357],
+ [-74.87,41.18],[-75.07,41.05],[-75.13,40.87],[-75.00,40.70],[-75.19,40.57],
+ [-75.07,40.42],[-74.95,40.32],[-74.72,40.15],[-75.02,39.99],[-75.14,39.88],
+ [-75.42,39.80],[-75.59,39.72],[-75.79,39.721],[-78.20,39.721],[-80.519,39.721]
+];
+
+/* County seats used as generator anchors, west-to-east across the oil region */
+var COUNTIES=[
+ ["Venango",-79.75,41.40,7,["Oil City","Franklin","Pleasantville"]],
+ ["Warren",-79.25,41.82,6,["Warren","Tidioute","Sheffield"]],
+ ["McKean",-78.58,41.80,5,["Bradford","Kane","Smethport"]],
+ ["Crawford",-80.10,41.68,5,["Titusville","Meadville","Cambridge Springs"]],
+ ["Butler",-79.92,40.90,4,["Butler","Chicora","Petrolia"]],
+ ["Armstrong",-79.47,40.82,4,["Kittanning","Ford City","Leechburg"]],
+ ["Forest",-79.23,41.50,3,["Tionesta","Marienville"]],
+ ["Erie",-80.05,41.98,3,["Corry","Union City","Waterford"]],
+ ["Clarion",-79.42,41.19,3,["Clarion","Foxburg","Knox"]],
+ ["Elk",-78.65,41.42,3,["St. Marys","Ridgway","Johnsonburg"]],
+ ["Allegheny",-79.98,40.47,3,["Plum","Harmar","Elizabeth"]],
+ ["Indiana",-79.09,40.65,3,["Indiana","Homer City","Saltsburg"]],
+ ["Washington",-80.25,40.19,3,["Washington","Canonsburg","Charleroi"]],
+ ["Mercer",-80.26,41.30,3,["Greenville","Grove City","Sharon"]],
+ ["Jefferson",-78.99,41.13,2,["Brookville","Punxsutawney"]],
+ ["Westmoreland",-79.47,40.31,2,["Greensburg","Latrobe"]],
+ ["Fayette",-79.65,39.92,2,["Uniontown","Connellsville"]],
+ ["Greene",-80.22,39.86,2,["Waynesburg","Carmichaels"]],
+ ["Lawrence",-80.34,40.99,2,["New Castle","Ellwood City"]],
+ ["Beaver",-80.35,40.68,2,["Beaver Falls","Monaca"]],
+ ["Clearfield",-78.47,41.00,2,["Clearfield","DuBois"]],
+ ["Cambria",-78.70,40.50,1,["Johnstown"]],
+ ["Somerset",-79.03,39.97,1,["Somerset"]],
+ ["Centre",-77.82,40.92,1,["Philipsburg"]],
+ ["Potter",-77.90,41.75,1,["Coudersport"]],
+ ["Tioga",-77.25,41.77,1,["Wellsboro"]],
+ ["Lycoming",-77.06,41.34,1,["Williamsport"]],
+ ["Bradford",-76.52,41.79,1,["Towanda"]],
+ ["Susquehanna",-75.80,41.82,1,["Montrose"]],
+ ["Luzerne",-76.00,41.18,1,["Wilkes-Barre"]],
+ ["Schuylkill",-76.22,40.70,1,["Pottsville"]]
+];
+
+/* ============================================================
+   2. RISK MODEL \u2014 six weighted factors, 100 points total
+   ============================================================ */
+var FACTORS=[
+ {k:"structure", label:"Occupied structure proximity", max:30},
+ {k:"methane",   label:"Surface methane concentration", max:25},
+ {k:"water",     label:"Water resource proximity",      max:15},
+ {k:"age",       label:"Age and record quality",        max:12},
+ {k:"sensitive", label:"Sensitive site within 1,500 ft",max:10},
+ {k:"condition", label:"Wellbore physical condition",   max:8}
+];
+
+var METHANE_LEVELS=[
+ {v:0,    label:"Nothing unusual",              ppm:0,     pts:0},
+ {v:1,    label:"Faint sulfur smell",           ppm:120,   pts:5},
+ {v:2,    label:"Strong smell, no sound",       ppm:640,   pts:11},
+ {v:3,    label:"Audible hissing",              ppm:2400,  pts:18},
+ {v:4,    label:"Hissing + bubbling water",     ppm:9500,  pts:25}
+];
+var CONDITIONS=[
+ {v:"intact",       label:"Capped or intact",       pts:2},
+ {v:"deteriorated", label:"Rusted through",         pts:5},
+ {v:"open",         label:"Open hole, no casing",   pts:8}
+];
+var ERAS=[
+ {v:1875, label:"Before 1900",  pts:12},
+ {v:1915, label:"1900 \u2013 1929",  pts:9},
+ {v:1945, label:"1930 \u2013 1959",  pts:6},
+ {v:1972, label:"1960 \u2013 1984",  pts:3},
+ {v:1995, label:"1985 or later",pts:1}
+];
+
+function ptsStructure(ft){ return ft<150?30 : ft<500?22 : ft<1000?14 : ft<2500?7 : 2; }
+function ptsWater(ft){ return ft<100?15 : ft<500?10 : ft<1500?5 : 1; }
+function ptsMethane(ppm){ return ppm>5000?25 : ppm>1000?18 : ppm>200?11 : ppm>50?5 : 0; }
+function ptsEra(year){ return year<1900?12 : year<1930?9 : year<1960?6 : year<1985?3 : 1; }
+function ptsCondition(c){ for(var i=0;i<CONDITIONS.length;i++) if(CONDITIONS[i].v===c) return CONDITIONS[i].pts; return 2; }
+
+function score(w){
+  var p={
+    structure: ptsStructure(w.structureFt),
+    methane:   ptsMethane(w.methanePpm),
+    water:     ptsWater(w.streamFt),
+    age:       ptsEra(w.year),
+    sensitive: w.sensitive?10:0,
+    condition: ptsCondition(w.condition)
+  };
+  var t=0; for(var k in p) t+=p[k];
+  return {parts:p,total:t};
+}
+function tierOf(s){ return s>=70?"Critical" : s>=50?"High" : s>=30?"Moderate" : "Low"; }
+var TIERS=["Critical","High","Moderate","Low"];
+var TIER_VAR={Critical:"--crit",High:"--high",Moderate:"--mod",Low:"--low"};
+
+/* ============================================================
+   3. SYNTHETIC INVENTORY \u2014 deterministic, so the demo is stable
+   ============================================================ */
+function mulberry32(a){ return function(){ a|=0; a=a+0x6D2B79F5|0; var t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
+var rnd=mulberry32(0x57454C4C);
+function pick(arr){ return arr[Math.floor(rnd()*arr.length)]; }
+function between(a,b){ return a+rnd()*(b-a); }
+
+var WELLS=[], seq=0;
+COUNTIES.forEach(function(c){
+  var name=c[0], lon=c[1], lat=c[2], n=c[3], towns=c[4];
+  var oilRegion=n>=3;
+  for(var i=0;i<n;i++){
+    var w={};
+    w.id="OW-"+name.slice(0,3).toUpperCase()+"-"+String(++seq).padStart(4,"0");
+    w.county=name;
+    w.town=pick(towns);
+    w.lon=lon+between(-0.22,0.22);
+    w.lat=lat+between(-0.13,0.13);
+    /* older wells cluster in the historic oil region */
+    var eraRoll=rnd()*(oilRegion?0.72:1);
+    w.year = eraRoll<0.22?Math.floor(between(1862,1899))
+           : eraRoll<0.48?Math.floor(between(1900,1929))
+           : eraRoll<0.72?Math.floor(between(1930,1959))
+           : eraRoll<0.90?Math.floor(between(1960,1984))
+           : Math.floor(between(1985,2001));
+    w.depthFt=Math.round(between(280,4200)/10)*10;
+    var cr=rnd();
+    w.condition = cr<0.26?"open" : cr<0.62?"deteriorated" : "intact";
+    w.structureFt=Math.round(Math.pow(between(0.12,1),2.6)*6200/10)*10+40;
+    w.streamFt=Math.round(Math.pow(between(0.1,1),2.0)*3800/10)*10+20;
+    /* leakage correlates with condition, age, and how close a well sits to people \u2014
+       wells beside houses are the ones neighbors notice and investigators actually test */
+    var leakBias=(w.condition==="open"?0.45:w.condition==="deteriorated"?0.2:0)
+               + (w.year<1930?0.18:0)
+               + (w.structureFt<600?0.24:0);
+    var mr=rnd()+leakBias;
+    var lvl = mr<0.42?0 : mr<0.62?1 : mr<0.80?2 : mr<0.95?3 : 4;
+    w.methanePpm=Math.round(METHANE_LEVELS[lvl].ppm*between(0.75,1.3));
+    w.sensitive=rnd()<0.11;
+    w.households=Math.max(0,Math.round((6200-Math.min(w.structureFt,6200))/6200*between(4,46)));
+    w.source= rnd()<0.34 ? "Citizen report" : "DEP legacy inventory";
+    /* plugging cost scales with depth, condition and access */
+    w.cost=Math.round((32000 + w.depthFt*38 + (w.condition==="open"?46000:0) + between(0,58000))/500)*500;
+    var s=score(w); w.score=s.total; w.parts=s.parts; w.tier=tierOf(s.total);
+    WELLS.push(w);
+  }
+});
+
+/* citizen submissions from this session, persisted per-viewer */
+var USER_WELLS=[];
+try{
+  var saved=localStorage.getItem("wellwatch.reports");
+  if(saved) USER_WELLS=JSON.parse(saved)||[];
+}catch(e){ USER_WELLS=[]; }
+function persist(){ try{ localStorage.setItem("wellwatch.reports",JSON.stringify(USER_WELLS)); }catch(e){} }
+function all(){ return USER_WELLS.concat(WELLS); }
+
+/* ============================================================
+   4. STATE
+   ============================================================ */
+var state={ county:"", tiers:{Critical:true,High:true,Moderate:true,Low:true}, selected:null, tab:"queue", pinning:false, pin:null, strategy:"eff", budget:3500000 };
+function visible(){
+  return all().filter(function(w){
+    return (!state.county||w.county===state.county) && state.tiers[w.tier];
+  }).sort(function(a,b){ return b.score-a.score; });
+}
+var $=function(s){ return document.querySelector(s); };
+var fmt=function(n){ return n.toLocaleString("en-US"); };
+var money=function(n){ return "$"+Math.round(n).toLocaleString("en-US"); };
+
+/* ============================================================
+   5. MASTHEAD STATS
+   ============================================================ */
+function renderStats(){
+  var a=all(), crit=a.filter(function(w){return w.tier==="Critical";}).length;
+  var hh=a.reduce(function(s,w){ return s+w.households; },0);
+  var cost=a.reduce(function(s,w){ return s+w.cost; },0);
+  $("#statstrip").innerHTML=[
+    ["", fmt(a.length), "Wells located"],
+    ["crit", fmt(crit), "Critical risk"],
+    ["", fmt(hh), "Households in radius"],
+    ["", "$"+(cost/1e6).toFixed(1)+"M", "Cost to close all"]
+  ].map(function(s){
+    return '<div class="stat '+s[0]+'"><div class="v">'+s[1]+'</div><div class="l">'+s[2]+'</div></div>';
+  }).join("");
+}
+
+/* ============================================================
+   6. MAP
+   ============================================================ */
+function renderMap(){
+  var svg=$("#map");
+  var d="M"+PA_OUTLINE.map(function(p){ return px(p[0]).toFixed(1)+" "+py(p[1]).toFixed(1); }).join("L")+"Z";
+  var parts=['<defs><pattern id="hatch" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">'+
+             '<line x1="0" y1="0" x2="0" y2="7" stroke="var(--map-edge)" stroke-width="0.5" opacity="0.28"/></pattern></defs>'];
+  parts.push('<path d="'+d+'" fill="var(--map-land)" stroke="var(--map-edge)" stroke-width="1.2" stroke-linejoin="round"/>');
+  parts.push('<path d="'+d+'" fill="url(#hatch)" stroke="none"/>');
+
+  /* graticule ticks \u2014 a survey-sheet cue, not decoration: they label the coordinates the reports carry */
+  for(var lo=-80;lo>=-80&&lo<=-75;lo++){
+    parts.push('<line x1="'+px(lo).toFixed(1)+'" y1="0" x2="'+px(lo).toFixed(1)+'" y2="'+MH+'" stroke="var(--map-edge)" stroke-width="0.5" opacity="0.16"/>');
+  }
+  for(var la=40;la<=42;la++){
+    parts.push('<line x1="0" y1="'+py(la).toFixed(1)+'" x2="'+MW+'" y2="'+py(la).toFixed(1)+'" stroke="var(--map-edge)" stroke-width="0.5" opacity="0.16"/>');
+  }
+
+  var vis=visible(), sel=state.selected;
+  vis.slice().reverse().forEach(function(w){
+    var r = w.tier==="Critical"?6.5 : w.tier==="High"?5.5 : w.tier==="Moderate"?4.5:3.8;
+    var isSel=sel&&sel.id===w.id;
+    parts.push('<circle class="marker" data-id="'+w.id+'" tabindex="0" role="button"'+
+      ' aria-label="'+w.id+', '+w.town+', risk '+w.score+' of 100"'+
+      ' cx="'+px(w.lon).toFixed(1)+'" cy="'+py(w.lat).toFixed(1)+'" r="'+(isSel?r+3:r)+'"'+
+      ' fill="var('+TIER_VAR[w.tier]+')" fill-opacity="'+(isSel?1:0.62)+'"'+
+      ' stroke="var('+TIER_VAR[w.tier]+')" stroke-width="'+(isSel?2.5:1.2)+'"/>');
+  });
+  if(state.pin){
+    parts.push('<circle cx="'+px(state.pin.lon).toFixed(1)+'" cy="'+py(state.pin.lat).toFixed(1)+'" r="9" fill="none" stroke="var(--accent)" stroke-width="2"/>'+
+               '<circle cx="'+px(state.pin.lon).toFixed(1)+'" cy="'+py(state.pin.lat).toFixed(1)+'" r="2.5" fill="var(--accent)"/>');
+  }
+  svg.innerHTML=parts.join("");
+  $("#mapCount").innerHTML='<span class="mono">'+vis.length+'</span> of <span class="mono">'+all().length+'</span> wells shown';
+}
+
+/* ============================================================
+   7. TIER FILTER BUTTONS
+   ============================================================ */
+$("#tierbtns").innerHTML=TIERS.map(function(t){
+  return '<button class="tierbtn" data-t="'+t+'" aria-pressed="true" type="button"><span class="dot"></span>'+t+'</button>';
+}).join("");
+$("#tierbtns").addEventListener("click",function(e){
+  var b=e.target.closest(".tierbtn"); if(!b) return;
+  var t=b.dataset.t; state.tiers[t]=!state.tiers[t];
+  b.setAttribute("aria-pressed",String(state.tiers[t]));
+  state.selected=null; renderMap(); renderQueue();
+});
+
+var csel=$("#countySel");
+COUNTIES.map(function(c){return c[0];}).sort().forEach(function(n){
+  var o=document.createElement("option"); o.value=n; o.textContent=n+" County"; csel.appendChild(o);
+});
+csel.addEventListener("change",function(){ state.county=csel.value; state.selected=null; renderMap(); renderQueue(); });
+
+/* ============================================================
+   8. QUEUE + DETAIL
+   ============================================================ */
+function renderQueue(){
+  var host=$("#p-queue");
+  if(state.selected){ host.innerHTML=detailHTML(state.selected); return; }
+  var vis=visible();
+  if(!vis.length){ host.innerHTML='<div class="panel-bd"><p style="margin:0;color:var(--ink-3);font-size:13.5px">No wells match this filter. Turn a risk tier back on, or switch to all counties.</p></div>'; return; }
+  var head='<div class="panel-hd"><h2>Ranked for plugging</h2><span class="eyebrow">'+vis.length+' wells</span></div>';
+  var rows=vis.map(function(w,i){
+    return '<button class="qrow" data-id="'+w.id+'" type="button">'+
+      '<div class="qrank">'+String(i+1).padStart(2,"0")+'</div>'+
+      '<div><div class="qname">'+w.town+', '+w.county+' Co.'+
+        (w.userReported?'<span class="chip citizen">Your report</span>':'')+'</div>'+
+        '<div class="qmeta">'+w.id+' \u00B7 '+w.year+' \u00B7 '+fmt(w.depthFt)+' ft \u00B7 '+money(w.cost)+'</div></div>'+
+      '<div><div class="qscore t-'+w.tier+'">'+w.score+'</div><div class="qtier t-'+w.tier+'">'+w.tier+'</div></div>'+
+    '</button>';
+  }).join("");
+  host.innerHTML=head+'<ul class="queue">'+rows+'</ul>';
+}
+
+function detailHTML(w){
+  var bars=FACTORS.map(function(f){
+    var v=w.parts[f.k], pct=Math.round(v/f.max*100);
+    return '<div class="factor"><div class="fl">'+f.label+'</div><div class="fv">'+v+'/'+f.max+'</div>'+
+           '<div class="bar"><i style="width:'+pct+'%;background:var('+TIER_VAR[w.tier]+')"></i></div></div>';
+  }).join("");
+  var mlabel = w.methanePpm>5000?"severe venting" : w.methanePpm>1000?"active leak" : w.methanePpm>200?"measurable" : w.methanePpm>50?"trace":"none detected";
+  var cond=CONDITIONS.filter(function(c){return c.v===w.condition;})[0].label;
+  var note = w.parts.structure>=22
+    ? "This wellbore sits close enough to occupied housing that migrating methane can accumulate in a basement. DEP treats this combination as an emergency response trigger, not a routine plugging job."
+    : w.parts.water>=10
+    ? "The wellbore is close enough to surface water that brine and hydrocarbon migration would reach the stream before it reached a monitoring point."
+    : "No occupied structure or waterway is in the immediate hazard radius. This well belongs in the scheduled plugging program rather than emergency response.";
+  return '<div class="panel-bd">'+
+    '<button class="backbtn" id="backBtn" type="button">\u2190 Back to queue</button>'+
+    '<div class="dtl-head"><h3>'+w.town+', '+w.county+' County</h3>'+
+      '<div class="bigscore"><div class="n t-'+w.tier+'">'+w.score+'</div><div class="d t-'+w.tier+'">'+w.tier+'</div></div></div>'+
+    '<div class="eyebrow">'+w.id+' \u00B7 '+w.source+'</div>'+
+    '<dl class="kv">'+
+      '<dt>Coordinates</dt><dd>'+w.lat.toFixed(4)+'\u00B0 N, '+Math.abs(w.lon).toFixed(4)+'\u00B0 W</dd>'+
+      '<dt>Drilled</dt><dd>'+w.year+'</dd>'+
+      '<dt>Total depth</dt><dd>'+fmt(w.depthFt)+' ft</dd>'+
+      '<dt>Wellbore</dt><dd>'+cond+'</dd>'+
+      '<dt>Surface methane</dt><dd>'+fmt(w.methanePpm)+' ppm ('+mlabel+')</dd>'+
+      '<dt>Nearest building</dt><dd>'+fmt(w.structureFt)+' ft</dd>'+
+      '<dt>Nearest water</dt><dd>'+fmt(w.streamFt)+' ft</dd>'+
+      '<dt>Households in radius</dt><dd>'+w.households+'</dd>'+
+      '<dt>Plugging estimate</dt><dd>'+money(w.cost)+'</dd>'+
+    '</dl>'+
+    '<div style="margin:16px 0 4px" class="eyebrow">Score composition</div>'+bars+
+    '<div class="note">'+note+'</div>'+
+  '</div>';
+}
+
+document.addEventListener("click",function(e){
+  var row=e.target.closest(".qrow"), mk=e.target.closest(".marker"), back=e.target.closest("#backBtn");
+  if(back){ state.selected=null; renderQueue(); renderMap(); return; }
+  var id = row?row.dataset.id : mk?mk.dataset.id : null;
+  if(!id) return;
+  if(state.pinning) return;
+  var w=all().filter(function(x){return x.id===id;})[0];
+  state.selected = (state.selected&&state.selected.id===id) ? null : w;
+  if(state.selected) setTab("queue");
+  renderQueue(); renderMap();
+});
+$("#map").addEventListener("keydown",function(e){
+  if(e.key!=="Enter"&&e.key!==" ") return;
+  var mk=e.target.closest(".marker"); if(!mk) return;
+  e.preventDefault(); mk.dispatchEvent(new MouseEvent("click",{bubbles:true}));
+});
+
+/* ============================================================
+   9. TABS
+   ============================================================ */
+function setTab(name){
+  state.tab=name;
+  ["queue","report","plan"].forEach(function(n){
+    $("#tab-"+n).setAttribute("aria-selected",String(n===name));
+    $("#p-"+n).hidden = n!==name;
+  });
+  if(name==="plan") renderPlan();
+}
+["queue","report","plan"].forEach(function(n){
+  $("#tab-"+n).addEventListener("click",function(){ if(n!=="queue") state.selected=null; setTab(n); renderQueue(); renderMap(); });
+});
+
+/* ============================================================
+   10. FIELD REPORT
+   ============================================================ */
+$("#f_methane").innerHTML=METHANE_LEVELS.map(function(m,i){
+  return '<label><input type="radio" name="meth" value="'+i+'"'+(i===2?" checked":"")+'><span>'+m.label+'</span></label>';
+}).join("");
+$("#f_cond").innerHTML=CONDITIONS.map(function(c,i){
+  return '<label><input type="radio" name="cond" value="'+c.v+'"'+(i===1?" checked":"")+'><span>'+c.label+'</span></label>';
+}).join("");
+$("#f_era").innerHTML=ERAS.map(function(e,i){
+  return '<option value="'+e.v+'"'+(i===1?" selected":"")+'>'+e.label+'</option>';
+}).join("");
+
+function draft(){
+  var mi=parseInt(document.querySelector('input[name=meth]:checked').value,10);
+  return {
+    structureFt:Math.max(0,parseInt($("#f_struct").value,10)||0),
+    streamFt:Math.max(0,parseInt($("#f_stream").value,10)||0),
+    methanePpm:METHANE_LEVELS[mi].ppm,
+    condition:document.querySelector('input[name=cond]:checked').value,
+    year:parseInt($("#f_era").value,10),
+    sensitive:$("#f_sens").value==="1"
+  };
+}
+function refreshLive(){
+  var d=draft(), s=score(d);
+  var el=$("#liveScore");
+  el.textContent=s.total;
+  el.className="t-"+tierOf(s.total);
+  $("#submitBtn").disabled=!state.pin;
+}
+$("#p-report").addEventListener("input",refreshLive);
+$("#p-report").addEventListener("change",refreshLive);
+
+$("#pinBtn").addEventListener("click",function(){
+  state.pinning=!state.pinning;
+  $("#mapPanel").classList.toggle("pin-arm",state.pinning);
+  $("#pinBtn").textContent=state.pinning?"Click the map to place it":"Drop a pin on the map";
+  $("#mapHint").textContent=state.pinning?"Click anywhere inside Pennsylvania to set the location.":"Click any well for its risk breakdown.";
+});
+$("#map").addEventListener("click",function(e){
+  if(!state.pinning) return;
+  var r=this.getBoundingClientRect();
+  var lon=LON0+((e.clientX-r.left)/r.width)*(LON1-LON0);
+  var lat=LAT1-((e.clientY-r.top)/r.height)*(LAT1-LAT0);
+  state.pin={lon:lon,lat:lat};
+  state.pinning=false;
+  $("#mapPanel").classList.remove("pin-arm");
+  $("#pinBtn").textContent="Move the pin";
+  $("#mapHint").textContent="Click any well for its risk breakdown.";
+  $("#pinOut").textContent=lat.toFixed(4)+"\u00B0 N, "+Math.abs(lon).toFixed(4)+"\u00B0 W";
+  refreshLive(); renderMap();
+});
+
+/* nearest county seat gives the report a human-readable place name */
+function nearestCounty(lon,lat){
+  var best=COUNTIES[0], bd=1e9;
+  COUNTIES.forEach(function(c){
+    var d=(c[1]-lon)*(c[1]-lon)+(c[2]-lat)*(c[2]-lat);
+    if(d<bd){ bd=d; best=c; }
+  });
+  return best;
+}
+$("#submitBtn").addEventListener("click",function(){
+  if(!state.pin) return;
+  var c=nearestCounty(state.pin.lon,state.pin.lat);
+  var d=draft(), s=score(d);
+  var w={
+    id:"OW-CIT-"+String(Date.now()).slice(-4),
+    county:c[0], town:c[4][0],
+    lon:state.pin.lon, lat:state.pin.lat,
+    year:d.year, depthFt:Math.round((900+Math.random()*1800)/10)*10,
+    condition:d.condition, methanePpm:d.methanePpm,
+    structureFt:d.structureFt, streamFt:d.streamFt, sensitive:d.sensitive,
+    households:Math.max(0,Math.round((6200-Math.min(d.structureFt,6200))/6200*24)),
+    source:"Citizen report", userReported:true,
+    score:s.total, parts:s.parts, tier:tierOf(s.total)
+  };
+  w.cost=Math.round((32000+w.depthFt*38+(w.condition==="open"?46000:0)+22000)/500)*500;
+  USER_WELLS.unshift(w); persist();
+  var rank=visible().findIndex(function(x){return x.id===w.id;})+1;
+  var note=$("#reportNote");
+  note.hidden=false;
+  note.innerHTML="<b>Report filed as "+w.id+".</b> Scored <b>"+w.score+"/100 \u2014 "+w.tier+
+    "</b> and inserted at rank "+rank+" of "+visible().length+" in the "+(state.county||"statewide")+
+    " queue. In production this would post to the DEP eFACTS intake with your photo and GPS fix attached.";
+  state.pin=null; $("#pinOut").textContent="No location set";
+  $("#pinBtn").textContent="Drop a pin on the map";
+  renderStats(); renderMap(); renderQueue(); refreshLive();
+});
+
+/* ============================================================
+   11. PLUGGING PLANNER \u2014 greedy allocation under a budget cap
+   ============================================================ */
+function allocate(pool,budget,strategy){
+  var ranked=pool.slice().sort(function(a,b){
+    return strategy==="risk" ? b.score-a.score : (b.score/b.cost)-(a.score/a.cost);
+  });
+  var spent=0, chosen=[];
+  for(var i=0;i<ranked.length;i++){
+    if(spent+ranked[i].cost<=budget){ chosen.push(ranked[i]); spent+=ranked[i].cost; }
+  }
+  var crit=chosen.filter(function(w){return w.tier==="Critical";}).length;
+  return {
+    chosen:chosen, spent:spent,
+    risk:chosen.reduce(function(s,w){return s+w.score;},0),
+    households:chosen.reduce(function(s,w){return s+w.households;},0),
+    crit:crit
+  };
+}
+function renderPlan(){
+  var pool=visible();
+  var eff=allocate(pool,state.budget,"eff");
+  var risk=allocate(pool,state.budget,"risk");
+  var cur=state.strategy==="eff"?eff:risk, other=state.strategy==="eff"?risk:eff;
+  var totalCrit=pool.filter(function(w){return w.tier==="Critical";}).length;
+
+  $("#budgetOut").textContent="$"+(state.budget/1e6).toFixed(1)+"M";
+  $("#planOut").innerHTML=[
+    ['<div class="v">'+cur.chosen.length+'</div><div class="l">Wells plugged</div><div class="sub">of '+pool.length+' in scope</div>'],
+    ['<div class="v">'+fmt(cur.risk)+'</div><div class="l">Risk points retired</div><div class="sub">'+(cur.spent?(cur.risk/(cur.spent/1e6)).toFixed(1):"0")+' per $1M spent</div>'],
+    ['<div class="v">'+fmt(cur.households)+'</div><div class="l">Households cleared</div><div class="sub">within the hazard radius</div>'],
+    ['<div class="v">'+cur.crit+'/'+totalCrit+'</div><div class="l">Critical wells closed</div><div class="sub">'+money(cur.spent)+' committed</div>']
+  ].map(function(o){ return '<div class="out">'+o[0]+'</div>'; }).join("");
+
+  var dw=cur.chosen.length-other.chosen.length, dr=cur.risk-other.risk;
+  var label=state.strategy==="eff"?"Risk retired per dollar":"Highest risk first";
+  var alt=state.strategy==="eff"?"highest-risk-first":"per-dollar";
+  var msg;
+  if(dr>0) msg="<b>"+label+" wins here.</b> Against the "+alt+" plan it closes "+Math.abs(dw)+" more well"+(Math.abs(dw)===1?"":"s")+" and retires "+fmt(Math.abs(dr))+" more risk points for the same money.";
+  else if(dr<0) msg="<b>"+label+" costs you "+fmt(Math.abs(dr))+" risk points</b> versus the "+alt+" plan at this budget. Deep critical wells eat the grant before the shallow ones get funded.";
+  else msg="<b>Both strategies tie at this budget.</b> Move the slider to find where they diverge.";
+  $("#planDelta").innerHTML=msg;
+
+  $("#fundlist").innerHTML=cur.chosen.slice(0,40).map(function(w){
+    return '<li><span>'+w.town+', '+w.county+' Co. <span class="t-'+w.tier+'" style="font-weight:700">'+w.score+'</span></span>'+
+           '<span class="m">'+money(w.cost)+'</span></li>';
+  }).join("")+(cur.chosen.length>40?'<li><span style="color:var(--ink-3)">+ '+(cur.chosen.length-40)+' more funded</span><span></span></li>':"");
+}
+$("#budget").addEventListener("input",function(){ state.budget=parseInt(this.value,10); renderPlan(); });
+$("#strat").addEventListener("click",function(e){
+  var b=e.target.closest(".stratbtn"); if(!b) return;
+  state.strategy=b.dataset.s;
+  Array.prototype.forEach.call(this.querySelectorAll(".stratbtn"),function(x){
+    x.setAttribute("aria-pressed",String(x.dataset.s===state.strategy));
+  });
+  renderPlan();
+});
+
+/* ============================================================
+   12. BOOT
+   ============================================================ */
+renderStats(); renderMap(); renderQueue(); refreshLive();
+})();
+</script>
+</body>
+</html>
