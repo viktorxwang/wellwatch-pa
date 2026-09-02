@@ -22,10 +22,12 @@
   --ink-3:#69735F;
   --accent:#1F6F5C;
   --accent-soft:#DCE9E2;
+  /* Tier colours are solved for >=4.5:1 against every light background they
+     are painted on: --surface, --paper, --surface-2 and their own tint chip. */
   --crit:#A5301C;
-  --high:#B26908;
-  --mod:#6C8021;
-  --low:#3E7484;
+  --high:#965807;
+  --mod:#5C6E1C;
+  --low:#3A6C7B;
   --crit-bg:#F5DED8;
   --high-bg:#F7E7CD;
   --mod-bg:#E6EDCF;
@@ -33,7 +35,18 @@
   --map-land:#E7EBE0;
   --map-edge:#8E9A88;
   --shadow:0 1px 2px rgba(23,28,24,.06), 0 8px 24px -12px rgba(23,28,24,.18);
+  --shadow-lift:0 2px 4px rgba(23,28,24,.08), 0 14px 32px -14px rgba(23,28,24,.26);
   --r:3px;
+
+  /* Motion. Two durations, two curves - every interaction draws from these
+     rather than inventing its own, so the whole surface eases the same way. */
+  --dur-1:110ms;          /* colour / opacity swaps */
+  --dur-2:200ms;          /* movement and size */
+  --ease-out:cubic-bezier(.2,.7,.35,1);
+  --ease-spring:cubic-bezier(.34,1.4,.5,1);
+
+  /* Spacing scale - deliberately uneven so panels do not all share one rhythm */
+  --sp-1:4px; --sp-2:8px; --sp-3:13px; --sp-4:20px; --sp-5:34px;
 }
 :root:not([data-theme="light"]) { color-scheme: light; }
 @media (prefers-color-scheme: dark){
@@ -59,6 +72,7 @@
     --map-land:#1C241E;
     --map-edge:#43524589;
     --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px -14px rgba(0,0,0,.7);
+    --shadow-lift:0 2px 6px rgba(0,0,0,.5), 0 16px 40px -16px rgba(0,0,0,.85);
     color-scheme: dark;
   }
 }
@@ -84,6 +98,7 @@
   --map-land:#1C241E;
   --map-edge:#435245;
   --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px -14px rgba(0,0,0,.7);
+    --shadow-lift:0 2px 6px rgba(0,0,0,.5), 0 16px 40px -16px rgba(0,0,0,.85);
   color-scheme: dark;
 }
 
@@ -99,12 +114,41 @@ body{
 }
 h1,h2,h3{font-family:"Zilla Slab",Georgia,serif;font-weight:600;margin:0;text-wrap:balance;letter-spacing:-.01em}
 .mono{font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace;font-variant-numeric:tabular-nums}
+/* Landmark headings: announced by screen readers, absent for sighted users
+   because the panel itself is self-evident on screen. */
+.vh{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;border:0}
+.tabs-nav{display:block}
 .eyebrow{
   font-size:10.5px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;
   color:var(--ink-3);font-family:"Public Sans",sans-serif;
 }
 button{font:inherit;color:inherit}
-:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:2px}
+
+/* Focus is a visible ring plus a soft halo, so it reads on both the pale
+   surfaces and the tinted chips without relying on the ring alone. */
+:focus-visible{
+  outline:2px solid var(--accent);outline-offset:2px;border-radius:2px;
+  box-shadow:0 0 0 5px color-mix(in srgb,var(--accent) 18%,transparent);
+}
+/* Pointer users never see the halo; keyboard users always do. */
+:focus:not(:focus-visible){outline:none}
+
+/* Every interactive surface eases from the shared tokens. */
+.tab,.tierbtn,.btn,.qrow,.stratbtn,.backbtn,.radios label,.fundlist li,
+select,input[type=number]{
+  transition:
+    background-color var(--dur-1) var(--ease-out),
+    border-color var(--dur-1) var(--ease-out),
+    color var(--dur-1) var(--ease-out),
+    box-shadow var(--dur-2) var(--ease-out),
+    transform var(--dur-2) var(--ease-out);
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{
+    animation-duration:.01ms !important;animation-iteration-count:1 !important;
+    transition-duration:.01ms !important;scroll-behavior:auto !important;
+  }
+}
 
 /* ---------- masthead ---------- */
 .masthead{
@@ -173,8 +217,16 @@ select,input[type=text],input[type=number],textarea{
 #map{display:block;width:100%;height:auto;background:var(--surface)}
 .mapfoot{padding:9px 16px;border-top:1px solid var(--line-soft);font-size:12px;color:var(--ink-3);display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
 .pin-arm #map{cursor:crosshair}
-.marker{cursor:pointer;transition:r .12s ease}
-.marker:hover{stroke-width:2.5}
+.marker{
+  cursor:pointer;
+  transition:r var(--dur-2) var(--ease-spring), fill-opacity var(--dur-1) var(--ease-out),
+             stroke-width var(--dur-1) var(--ease-out);
+}
+.marker:hover{stroke-width:2.6;fill-opacity:.95}
+.marker:focus-visible{outline:none;stroke-width:3;fill-opacity:1}
+/* Dim the rest of the field while one well is under the cursor, so the
+   hovered marker separates without growing large enough to shift the map. */
+#map:hover .marker:not(:hover){fill-opacity:.34}
 
 /* ---------- tabs ---------- */
 .tabs{display:flex;border-bottom:1px solid var(--line)}
@@ -190,7 +242,19 @@ select,input[type=text],input[type=number],textarea{
 .queue{list-style:none;margin:0;padding:0;max-height:640px;overflow-y:auto}
 .qrow{display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:12px;align-items:center;
   padding:11px 16px;border-bottom:1px solid var(--line-soft);cursor:pointer;background:transparent;width:100%;border-left:0;border-right:0;border-top:0;text-align:left}
-.qrow:hover{background:var(--surface-2)}
+/* A hovered row slides 3px off the left rule and grows an accent edge -
+   movement toward the detail view it opens, not a decorative lift. */
+.qrow{position:relative}
+.qrow::before{
+  content:"";position:absolute;left:0;top:0;bottom:-1px;width:2px;
+  background:var(--accent);transform:scaleY(0);transform-origin:50% 50%;
+  transition:transform var(--dur-2) var(--ease-out);
+}
+.qrow:hover{background:var(--surface-2);padding-left:19px}
+.qrow:hover::before{transform:scaleY(1)}
+.qrow:active{background:var(--line-soft)}
+.qrow:focus-visible{background:var(--surface-2);outline-offset:-2px}
+.qrow:focus-visible::before{transform:scaleY(1)}
 .qrank{font-family:"IBM Plex Mono",monospace;font-size:12px;font-weight:600;color:var(--ink-3);font-variant-numeric:tabular-nums}
 .qname{font-weight:600;font-size:14px;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
 .qmeta{font-size:12px;color:var(--ink-3);font-family:"IBM Plex Mono",monospace;margin-top:1px}
@@ -215,6 +279,11 @@ select,input[type=text],input[type=number],textarea{
 .factor .fv{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--ink-3);font-variant-numeric:tabular-nums}
 .bar{grid-column:1/-1;height:6px;background:var(--surface-2);border-radius:1px;overflow:hidden}
 .bar i{display:block;height:100%;background:var(--accent);border-radius:1px}
+/* Width and hue arrive as custom properties; the rule itself lives here.
+   Bars grow from zero on first paint so the composition reads as a result. */
+.bar-fill{width:var(--pct,0%);background:var(--bar,var(--accent));
+  animation:bar-grow var(--dur-2) var(--ease-out) both}
+@keyframes bar-grow{from{width:0}to{width:var(--pct,0%)}}
 .note{font-size:12.5px;color:var(--ink-2);background:var(--surface-2);border-left:2px solid var(--accent);padding:9px 12px;margin-top:14px;line-height:1.5}
 
 /* ---------- form ---------- */
@@ -237,7 +306,14 @@ select,input[type=text],input[type=number],textarea{
   background:var(--accent);color:var(--surface);border:1px solid var(--accent);border-radius:2px;
   padding:10px 16px;font-size:12.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;cursor:pointer;
 }
+.btn:hover:not(:disabled){
+  background:color-mix(in srgb,var(--accent) 86%,var(--ink));
+  border-color:color-mix(in srgb,var(--accent) 86%,var(--ink));
+  box-shadow:var(--shadow-lift);
+}
+.btn:active:not(:disabled){transform:translateY(1px);box-shadow:none}
 .btn.ghost{background:transparent;color:var(--accent)}
+.btn.ghost:hover:not(:disabled){background:var(--accent-soft);color:var(--accent);box-shadow:none}
 .btn:disabled{opacity:.45;cursor:not-allowed}
 .formfoot{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:4px}
 .livescore{margin-left:auto;font-family:"IBM Plex Mono",monospace;font-size:13px;color:var(--ink-3)}
@@ -250,7 +326,15 @@ input[type=range]{width:100%;accent-color:var(--accent);margin:6px 0 2px}
 .strat{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:16px 0 18px}
 @media (max-width:520px){.strat{grid-template-columns:1fr}}
 .stratbtn{text-align:left;border:1px solid var(--line);background:transparent;border-radius:2px;padding:10px 12px;cursor:pointer}
-.stratbtn[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.stratbtn:hover:not([aria-pressed="true"]){border-color:var(--ink-3);background:var(--surface-2)}
+.stratbtn[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft);box-shadow:inset 0 0 0 1px var(--accent)}
+.tierbtn:hover:not([aria-pressed="true"]){color:var(--ink-2);border-color:var(--ink-3)}
+.tierbtn:active{transform:translateY(1px)}
+.backbtn:hover{color:var(--ink);gap:9px}
+.backbtn{transition:gap var(--dur-2) var(--ease-out),color var(--dur-1) var(--ease-out)}
+.radios label:hover:not(:has(input:checked)){border-color:var(--ink-3);background:var(--surface-2)}
+.fundlist li:hover{background:var(--surface-2)}
+select:hover,input[type=number]:hover{border-color:var(--ink-3)}
 .stratbtn .st{font-size:12.5px;font-weight:700}
 .stratbtn .sd{font-size:11.5px;color:var(--ink-3);margin-top:2px;line-height:1.35}
 .outgrid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line-soft);border:1px solid var(--line-soft)}
@@ -262,11 +346,32 @@ input[type=range]{width:100%;accent-color:var(--accent);margin:6px 0 2px}
 .fundlist{list-style:none;margin:14px 0 0;padding:0;max-height:230px;overflow-y:auto;border-top:1px solid var(--line-soft)}
 .fundlist li{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px solid var(--line-soft);font-size:12.5px}
 .fundlist .m{font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;color:var(--ink-3)}
-footer.src{max-width:1360px;margin:0 auto;padding:0 22px 40px;font-size:11.5px;color:var(--ink-3);line-height:1.6;max-width:1360px}
+footer.src{max-width:1360px;margin:0 auto;padding:0 22px 40px;font-size:11.5px;color:var(--ink-3);line-height:1.6}
 footer.src b{color:var(--ink-2)}
+
+/* ---------- named classes replacing former inline style= attributes ----------
+   Presentation lived in three places (stylesheet, markup attributes, and JS
+   template strings). These pull all of it back into the stylesheet. */
+.lede{margin:0 0 16px;font-size:13.5px;color:var(--ink-2)}
+.lede:last-child{margin-bottom:0}
+.formfoot.flush{margin:0}
+.pin-out{font-size:12.5px;color:var(--ink-3)}
+.label-inline{margin-right:-2px}
+.empty-note{margin:0;color:var(--ink-3);font-size:13.5px}
+.comp-label{margin:16px 0 4px}
+.fund-score{font-weight:700}
+.fund-more{color:var(--ink-3)}
+.skip-link{
+  position:absolute;left:-9999px;top:0;z-index:10;
+  background:var(--accent);color:var(--surface);padding:9px 14px;
+  font-size:12px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;
+}
+.skip-link:focus{left:8px;top:8px}
 </style>
 </head>
 <body>
+<a class="skip-link" href="#main">Skip to the well queue</a>
+
 <header class="masthead">
   <div class="masthead-in">
     <div class="brand">
@@ -277,7 +382,9 @@ footer.src b{color:var(--ink-2)}
       </div>
       <div>
         <h1>WellWatch PA</h1>
-        <p>Crowdsourced discovery and risk triage for Pennsylvania's orphaned and abandoned oil &amp; gas wells.</p>
+        <p>Pennsylvania has 27,000 documented orphan oil wells and no record of the rest.
+           Report one from your phone; the state gets a plugging list ranked by who is
+           closest to the methane.</p>
         <span class="badge-gov">Prototype &middot; Congressional App Challenge</span>
       </div>
     </div>
@@ -286,12 +393,13 @@ footer.src b{color:var(--ink-2)}
   <div class="masthead-rule"><div></div></div>
 </header>
 
-<div class="wrap">
+<main class="wrap" id="main">
   <!-- ============ MAP ============ -->
   <div class="mapcol">
-    <section class="panel" id="mapPanel">
+    <section class="panel" id="mapPanel" aria-labelledby="mapHeading">
+      <h2 class="vh" id="mapHeading">Statewide well map and filters</h2>
       <div class="controls">
-        <label class="eyebrow" for="countySel" style="margin-right:-2px">County</label>
+        <label class="eyebrow label-inline" for="countySel">County</label>
         <select id="countySel"><option value="">All 31 counties</option></select>
         <div class="tierbtns" id="tierbtns"></div>
       </div>
@@ -305,26 +413,29 @@ footer.src b{color:var(--ink-2)}
 
   <!-- ============ WORK COLUMN ============ -->
   <div>
-    <section class="panel">
-      <div class="tabs" role="tablist">
-        <button class="tab" role="tab" id="tab-queue" aria-selected="true" aria-controls="p-queue">Triage queue</button>
-        <button class="tab" role="tab" id="tab-report" aria-selected="false" aria-controls="p-report">Field report</button>
-        <button class="tab" role="tab" id="tab-plan" aria-selected="false" aria-controls="p-plan">Plugging planner</button>
-      </div>
+    <section class="panel" aria-labelledby="workHeading">
+      <h2 class="vh" id="workHeading">Queue, reporting and budget planning</h2>
+      <nav class="tabs-nav" aria-label="Switch view">
+        <div class="tabs" role="tablist">
+          <button class="tab" role="tab" id="tab-queue" aria-selected="true" aria-controls="p-queue">Triage queue</button>
+          <button class="tab" role="tab" id="tab-report" aria-selected="false" aria-controls="p-report">Field report</button>
+          <button class="tab" role="tab" id="tab-plan" aria-selected="false" aria-controls="p-plan">Plugging planner</button>
+        </div>
+      </nav>
 
       <div id="p-queue" role="tabpanel" aria-labelledby="tab-queue"></div>
 
       <div id="p-report" role="tabpanel" aria-labelledby="tab-report" hidden>
         <div class="panel-bd">
-          <p style="margin:0 0 16px;font-size:13.5px;color:var(--ink-2)">
+          <p class="lede">
             Found a rusted pipe in a creek bed or a bubbling patch in a field? Log it here. The same scoring model
             the Department of Environmental Protection would use runs on your report the moment you submit it.
           </p>
           <div class="field">
             <label>Location</label>
-            <div class="formfoot" style="margin:0">
+            <div class="formfoot flush">
               <button class="btn ghost" id="pinBtn" type="button">Drop a pin on the map</button>
-              <span class="mono" id="pinOut" style="font-size:12.5px;color:var(--ink-3)">No location set</span>
+              <span class="mono pin-out" id="pinOut">No location set</span>
             </div>
           </div>
           <div class="grid2">
@@ -365,7 +476,7 @@ footer.src b{color:var(--ink-2)}
 
       <div id="p-plan" role="tabpanel" aria-labelledby="tab-plan" hidden>
         <div class="panel-bd">
-          <p style="margin:0 0 16px;font-size:13.5px;color:var(--ink-2)">
+          <p class="lede">
             Pennsylvania has more documented orphan wells than plugging money. This planner spends a fixed
             grant against the ranked inventory and shows what each spending strategy actually buys.
           </p>
@@ -391,7 +502,7 @@ footer.src b{color:var(--ink-2)}
       </div>
     </section>
   </div>
-</div>
+</main>
 
 <footer class="src">
   <b>About the data.</b> Well locations, depths and hazard readings in this prototype are synthetic but are generated
@@ -662,7 +773,7 @@ function renderQueue(){
   var host=$("#p-queue");
   if(state.selected){ host.innerHTML=detailHTML(state.selected); return; }
   var vis=visible();
-  if(!vis.length){ host.innerHTML='<div class="panel-bd"><p style="margin:0;color:var(--ink-3);font-size:13.5px">No wells match this filter. Turn a risk tier back on, or switch to all counties.</p></div>'; return; }
+  if(!vis.length){ host.innerHTML='<div class="panel-bd"><p class="empty-note">No wells match this filter. Turn a risk tier back on, or switch to all counties.</p></div>'; return; }
   var head='<div class="panel-hd"><h2>Ranked for plugging</h2><span class="eyebrow">'+vis.length+' wells</span></div>';
   var rows=vis.map(function(w,i){
     return '<button class="qrow" data-id="'+w.id+'" type="button">'+
@@ -680,7 +791,7 @@ function detailHTML(w){
   var bars=FACTORS.map(function(f){
     var v=w.parts[f.k], pct=Math.round(v/f.max*100);
     return '<div class="factor"><div class="fl">'+f.label+'</div><div class="fv">'+v+'/'+f.max+'</div>'+
-           '<div class="bar"><i style="width:'+pct+'%;background:var('+TIER_VAR[w.tier]+')"></i></div></div>';
+           '<div class="bar"><i class="bar-fill" style="--pct:'+pct+'%;--bar:var('+TIER_VAR[w.tier]+')"></i></div></div>';
   }).join("");
   var mlabel = w.methanePpm>5000?"severe venting" : w.methanePpm>1000?"active leak" : w.methanePpm>200?"measurable" : w.methanePpm>50?"trace":"none detected";
   var cond=CONDITIONS.filter(function(c){return c.v===w.condition;})[0].label;
@@ -689,7 +800,7 @@ function detailHTML(w){
     : w.parts.water>=10
     ? "The wellbore is close enough to surface water that brine and hydrocarbon migration would reach the stream before it reached a monitoring point."
     : "No occupied structure or waterway is in the immediate hazard radius. This well belongs in the scheduled plugging program rather than emergency response.";
-  return '<div class="panel-bd">'+
+  return '<article class="panel-bd" aria-label="Risk detail for '+w.town+', '+w.county+' County">'+
     '<button class="backbtn" id="backBtn" type="button">\u2190 Back to queue</button>'+
     '<div class="dtl-head"><h3>'+w.town+', '+w.county+' County</h3>'+
       '<div class="bigscore"><div class="n t-'+w.tier+'">'+w.score+'</div><div class="d t-'+w.tier+'">'+w.tier+'</div></div></div>'+
@@ -705,9 +816,9 @@ function detailHTML(w){
       '<dt>Households in radius</dt><dd>'+w.households+'</dd>'+
       '<dt>Plugging estimate</dt><dd>'+money(w.cost)+'</dd>'+
     '</dl>'+
-    '<div style="margin:16px 0 4px" class="eyebrow">Score composition</div>'+bars+
+    '<div class="eyebrow comp-label">Score composition</div>'+bars+
     '<div class="note">'+note+'</div>'+
-  '</div>';
+  '</article>';
 }
 
 document.addEventListener("click",function(e){
@@ -877,9 +988,9 @@ function renderPlan(){
   $("#planDelta").innerHTML=msg;
 
   $("#fundlist").innerHTML=cur.chosen.slice(0,40).map(function(w){
-    return '<li><span>'+w.town+', '+w.county+' Co. <span class="t-'+w.tier+'" style="font-weight:700">'+w.score+'</span></span>'+
+    return '<li><span>'+w.town+', '+w.county+' Co. <span class="t-'+w.tier+' fund-score">'+w.score+'</span></span>'+
            '<span class="m">'+money(w.cost)+'</span></li>';
-  }).join("")+(cur.chosen.length>40?'<li><span style="color:var(--ink-3)">+ '+(cur.chosen.length-40)+' more funded</span><span></span></li>':"");
+  }).join("")+(cur.chosen.length>40?'<li><span class="fund-more">+ '+(cur.chosen.length-40)+' more funded</span><span></span></li>':"");
 }
 $("#budget").addEventListener("input",function(){ state.budget=parseInt(this.value,10); renderPlan(); });
 $("#strat").addEventListener("click",function(e){
