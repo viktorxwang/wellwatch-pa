@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>What's Under Pennsylvania?</title>
+  <meta name="description" content="How Pennsylvania's abandoned oil wells are found, scored and plugged, and how to report one you find." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@500;600;700&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <header>
+    <h1>What's Under Pennsylvania?</h1>
+    <nav>
+      <a href="#the-problem">The Problem</a>
+      <a href="#factors">Risk Factors</a>
+      <a href="#check">Field Check</a>
+      <a href="#report">How to Report</a>
+    </nav>
+  </header>
+
+  <!-- 1) The problem -->
+  <section id="the-problem" class="section fade-in">
+    <h2>The Problem</h2>
+    <p>
+      Pennsylvania drilled the world's first commercial oil well at Titusville in 1859, then spent the
+      next century not writing down where the holes went. Those wells are still here. They vent methane,
+      leak brine into streams, and occasionally fill basements with explosive gas.
+    </p>
+
+    <div class="pill-row">
+      <span class="pill">27,000 documented</span>
+      <span class="pill">100,000+ unrecorded</span>
+      <span class="pill">400 plugged in 3 years</span>
+      <span class="pill">$114.6M available</span>
+    </div>
+
+    <div class="timeline">
+      <h3>How Pennsylvania Got Here</h3>
+
+      <div class="timeline-item">
+        <span class="year">1859</span>
+        <p>Edwin Drake drills at Titusville. The commercial oil industry starts in Venango County.</p>
+      </div>
+
+      <div class="timeline-item">
+        <span class="year">1900s</span>
+        <p>Tens of thousands of wells are drilled with no requirement to record their locations.</p>
+      </div>
+
+      <div class="timeline-item">
+        <span class="year">1984</span>
+        <p>The Oil and Gas Act finally requires registration. Everything drilled earlier stays invisible.</p>
+      </div>
+
+      <div class="timeline-item">
+        <span class="year">2021</span>
+        <p>Federal infrastructure money arrives for plugging, but it covers a fraction of the inventory.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2) Risk factors -->
+  <section id="factors" class="section fade-in">
+    <h2>The Six Risk Factors</h2>
+    <p>WellWatch scores every well out of 100. Click a factor to see why it carries the weight it does.</p>
+
+    <div class="card-grid">
+      <div class="card" data-factor="Occupied structure proximity">
+        <h3>Occupied Structure</h3>
+        <p class="weight">30 points</p>
+        <p>How close the wellbore sits to a house, school or workplace.</p>
+        <button class="more-btn">Why it matters</button>
+      </div>
+
+      <div class="card" data-factor="Surface methane concentration">
+        <h3>Surface Methane</h3>
+        <p class="weight">25 points</p>
+        <p>Measured parts per million of methane escaping at the wellhead.</p>
+        <button class="more-btn">Why it matters</button>
+      </div>
+
+      <div class="card" data-factor="Water resource proximity">
+        <h3>Water Resources</h3>
+        <p class="weight">15 points</p>
+        <p>Distance to the nearest stream, spring or drinking water well.</p>
+        <button class="more-btn">Why it matters</button>
+      </div>
+
+      <div class="card" data-factor="Age and record quality">
+        <h3>Age and Records</h3>
+        <p class="weight">12 points</p>
+        <p>When the well was drilled and whether any construction record survives.</p>
+        <button class="more-btn">Why it matters</button>
+      </div>
+
+      <div class="card" data-factor="Sensitive site within 1,500 ft">
+        <h3>Sensitive Sites</h3>
+        <p class="weight">10 points</p>
+        <p>Schools, daycares and hospitals inside a 1,500 foot radius.</p>
+        <button class="more-btn">Why it matters</button>
+      </div>
+
+      <div class="card" data-factor="Wellbore physical condition">
+        <h3>Wellbore Condition</h3>
+        <p class="weight">8 points</p>
+        <p>Whether the pipe is capped, rusted through, or standing open.</p>
+        <button class="more-btn">Why it matters</button>
+      </div>
+    </div>
+
+    <div id="factor-details" class="factor-details hidden">
+      <h3 id="factor-title"></h3>
+      <p id="factor-text"></p>
+      <ul id="factor-notes"></ul>
+    </div>
+  </section>
+
+  <!-- 3) Field check -->
+  <section id="check" class="section fade-in">
+    <h2>Field Check: Is This Worth Reporting?</h2>
+    <p>Answer four questions about what you found. This runs the same weighting the real app uses.</p>
+
+    <form id="check-form">
+
+      <div class="question">
+        <h3>1. How close is the nearest occupied building?</h3>
+        <label><input type="radio" name="q1" value="30" /> Closer than 150 feet.</label>
+        <label><input type="radio" name="q1" value="20" /> Roughly 150 to 500 feet.</label>
+        <label><input type="radio" name="q1" value="10" /> Roughly 500 to 1,500 feet.</label>
+        <label><input type="radio" name="q1" value="0" /> Nothing occupied nearby.</label>
+      </div>
+
+      <div class="question">
+        <h3>2. What do you smell or hear at the pipe?</h3>
+        <label><input type="radio" name="q2" value="25" /> Hissing gas, or water bubbling beside it.</label>
+        <label><input type="radio" name="q2" value="18" /> A strong rotten-egg smell.</label>
+        <label><input type="radio" name="q2" value="9" /> A faint sulfur smell.</label>
+        <label><input type="radio" name="q2" value="0" /> Nothing noticeable.</label>
+      </div>
+
+      <div class="question">
+        <h3>3. How close is the nearest stream or water well?</h3>
+        <label><input type="radio" name="q3" value="15" /> Within about 100 feet.</label>
+        <label><input type="radio" name="q3" value="9" /> Within a few hundred feet.</label>
+        <label><input type="radio" name="q3" value="4" /> Farther than that.</label>
+        <label><input type="radio" name="q3" value="0" /> No water anywhere near.</label>
+      </div>
+
+      <div class="question">
+        <h3>4. What condition is the pipe in?</h3>
+        <label><input type="radio" name="q4" value="20" /> Open hole, nothing covering it.</label>
+        <label><input type="radio" name="q4" value="14" /> Rusted through or badly broken.</label>
+        <label><input type="radio" name="q4" value="6" /> Weathered but intact.</label>
+        <label><input type="radio" name="q4" value="0" /> Capped and sound.</label>
+      </div>
+
+      <button type="submit" class="primary-btn">Score it</button>
+      <button type="button" id="reset-check" class="secondary-btn">Reset</button>
+    </form>
+
+    <div id="check-result" class="check-result hidden">
+      <p class="score-line"><span id="score-value">0</span><span class="score-max">/100</span></p>
+      <h3 id="result-tier"></h3>
+      <p id="result-text"></p>
+    </div>
+  </section>
+
+  <!-- 4) How to report -->
+  <section id="report" class="section fade-in">
+    <h2>How to Report a Well</h2>
+
+    <div class="op-grid">
+      <div class="op-block">
+        <h3>Before You Go Near It</h3>
+        <ul>
+          <li>Do not smoke or run an engine beside an open wellbore</li>
+          <li>Stay upwind if you can smell gas</li>
+          <li>Never lower anything into the hole</li>
+          <li>Keep children and animals back from the opening</li>
+        </ul>
+      </div>
+
+      <div class="op-block">
+        <h3>What to Record</h3>
+        <ul>
+          <li>A GPS fix, with accuracy better than 30 feet</li>
+          <li>Photos of the pipe and the ground around it</li>
+          <li>Distance to the nearest building and stream</li>
+          <li>Anything you can smell or hear</li>
+        </ul>
+      </div>
+
+      <div class="op-block">
+        <h3>Who to Tell</h3>
+        <ul>
+          <li>PA DEP regional office for your county</li>
+          <li>DEP's oil and gas complaint line for active leaks</li>
+          <li>911 if gas is entering a building</li>
+          <li>Your county conservation district</li>
+        </ul>
+      </div>
+
+      <div class="op-block">
+        <h3>Why It Adds Up</h3>
+        <ul>
+          <li>An unlocated well cannot be scheduled for plugging</li>
+          <li>Reports build the record the grant money is spent against</li>
+          <li>One confirmed location can move a whole queue</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="path-helper">
+      <h3>Based on Your Field Check</h3>
+      <p id="path-text">Run the field check above to see what to do next.</p>
+    </div>
+  </section>
+
+  <footer>
+    <p>WellWatch PA &middot; A Congressional App Challenge prototype. Well data in the main app is synthetic.</p>
+    <p><a href="../index.html">Open the full WellWatch app</a></p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
